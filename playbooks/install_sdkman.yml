@@ -1,0 +1,17 @@
+- hosts: localhost
+  connection: local
+  roles:
+    - role: comcast.sdkman
+      sdkman_user: vagrant
+      sdkman_group: vagrant
+      sdkman_auto_answer: true
+      sdkman_update: true
+      sdkman_install_packages:
+        - { candidate: java, version: 17.0.1-open }
+      sdkman_flush_caches_before:
+        - temp
+      sdkman_flush_caches_after:
+        - archives
+        - broadcast
+        - candidates
+        - temp
