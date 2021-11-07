@@ -1,0 +1,39 @@
+---
+- name: Install required system packages
+  apt:
+    name:
+      - 'python3-pip'
+    state: latest
+    update_cache: yes
+
+- name: Install docker[tls]
+  pip:
+    name:
+      - docker[tls]
+
+- name: Pull image
+  docker_image:
+    name: jenkinsci/blueocean
+    source: pull
+
+- name: Run jenkins container
+  docker_container:
+    name: "{{ jenkins_container_name }}"
+    image: jenkinsci/blueocean
+    state: started
+    recreate: "{{ jenkins_container_recreate }}"
+    user: root
+    ports:
+      - "{{ jenkins_port }}:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+- name: Get key
+  command: "docker exec -i {{ jenkins_container_name }} cat /var/jenkins_home/secrets/initialAdminPassword"
+  retries: 10
+  delay: 5
+  register: initialAdminPassword
+  until: initialAdminPassword.rc == 0
+
+- debug:
+    msg: "{{ initialAdminPassword.stdout }}"
